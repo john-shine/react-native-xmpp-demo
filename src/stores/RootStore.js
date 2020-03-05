@@ -10,9 +10,9 @@ export const RootStore = types
     async save() {
       try {
         const transformedSnapshot = getSnapshot(self);
-        console.log(transformedSnapshot, 'transformedSnapshot');
+        return transformedSnapshot;
       } catch (err) {
-        console.warn('unexpected error ' + err);
+        console.warn('unexpected error: ', err);
       }
     },
   }));

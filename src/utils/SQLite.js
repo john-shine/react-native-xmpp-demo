@@ -5,6 +5,7 @@ SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
 class sqLiteManager {
+
     constructor(args) {
         this.dbInstance = null;
         this.chatTableName = 'user_chats';
@@ -82,8 +83,7 @@ class sqLiteManager {
             }
 
             i++;
-            let arg = args[k];
-            values.push(arg);
+            values.push(args[k]);
         }
         sql += ' WHERE mid=?';
         values.push(chatId);

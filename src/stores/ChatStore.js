@@ -1,4 +1,4 @@
-import {flow, types} from 'mobx-state-tree';
+import {types} from 'mobx-state-tree';
 import {ChatItem} from '../models/chatItem';
 
 export const ChatStore = types
@@ -7,11 +7,16 @@ export const ChatStore = types
     msgLists: types.optional(types.array(ChatItem), []),
   })
   .actions(self => {
-    const updateMsg = message => {
+    const updateItem = message => {
       self.msgLists.push(message);
     };
 
+    const initHistory = histories => {
+      self.msgLists = Object.assign([], histories);
+    }
+
     return {
-      updateMsg
+      updateItem,
+      initHistory
     };
   });

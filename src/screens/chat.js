@@ -64,7 +64,14 @@ class Chat extends React.Component {
 
       that.sqlite.queryChats(userAccount, chatWithUserAccount, 10).then( rows => {
         console.log('query chat history success: ', rows);
-        // update chat history props
+        // update chat histories
+        let histories = [];
+        for (let i = 0; i < rows.length; i++) {
+          let row = rows[i];
+          const history = this.getPropsMessageItem(row.mid, row.body, !!row.is_send, row.status, formatDateDay(row.create_timestamp));
+          histories.push(history);
+        }
+        that.props.chatStore.initHistory(histories);
       }).catch(err => {
         console.warn('query chat history error: ', err);
       });
@@ -120,7 +127,6 @@ class Chat extends React.Component {
 
   // login xmpp server
   xmppLogin = () => {
-    let user = this.getUserNameFromId(userAccount);
     if (this.logged) {
       console.log('Already logined.');
       return;
@@ -131,10 +137,11 @@ class Chat extends React.Component {
       return;
     }
 
+    const user = this.getUserNameFromId(userAccount);
+    console.info('try login with user: ' + user + ' password: ' + userPasswd + ' to server ' + server + ':' + port);
     this.isLogging = true;
-    console.info('try login with user: ', user, ' password: ', userPasswd, ' to server ', server, ':', port);
     XMPP.connect(
-      userAccount,
+      user,
       userPasswd,
       XMPP.PLAIN,
       server,
@@ -199,19 +206,26 @@ class Chat extends React.Component {
     }
   };
 
-  getPropsMessageItem = (messageId, text, isSend, status) => {
+  delayScrollToEnd = () => {
+    setTimeout(() => {
+      if (this.refFlatList && this.refFlatList.current) {
+        this.refFlatList.current.scrollToEnd();
+      }
+    }, 500);
+  };
+
+  getPropsMessageItem = (messageId, text, isSend, status, datetime) => {
     return {
       id: messageId,
       text: text,
       status: status,
       is_send: isSend,
-      datetime: formatDateDay(new Date())
+      datetime: datetime ? datetime : formatDateDay(new Date())
     }
   };
 
   // send chat message
   sendMessage = async () => {
-    let that = this;
     const {userInput} = this.state;
     const messageText = userInput.trim();
     console.log('messageText', messageText);
@@ -244,13 +258,9 @@ class Chat extends React.Component {
 
       console.log('message send success: ', messageId);
       messageItem = this.getPropsMessageItem(messageId, messageText, true, this.STATUS_SENT);
-      this.props.chatStore.updateMsg(messageItem).then(() => {
-        setTimeout(() => {
-          if (that.refFlatList && that.refFlatList.current) {
-            that.refFlatList.current.scrollToEnd();
-          }
-        }, 500);
-      });
+      this.props.chatStore.updateItem(messageItem);
+      this.delayScrollToEnd();
+
     }).catch(err => {
       try {
         chatRow = this.sqlite.getChatItem(messageId, messageText, userAccount, chatWithUserAccount, true, this.STATUS_FAILURE);
@@ -266,13 +276,8 @@ class Chat extends React.Component {
 
       console.log('message send failure: ', messageId, err);
       messageItem = this.getPropsMessageItem(messageId, messageText, true, this.STATUS_FAILURE);
-      this.props.chatStore.updateMsg(messageItem).then(() => {
-        setTimeout(() => {
-          if (that.refFlatList && that.refFlatList.current) {
-            that.refFlatList.current.scrollToEnd();
-          }
-        }, 500);
-      });
+      this.props.chatStore.updateItem(messageItem);
+      this.delayScrollToEnd();
 
     });
 
@@ -303,23 +308,14 @@ class Chat extends React.Component {
       console.error('insert chat row failure', err);
     }
 
-    const msgItem = this.getPropsMessageItem(messageId, messageText, false, message.time);
-
     if (String(this.getUserIdFromName(fromUserName)) !== String(chatWithUserAccount)) {
       console.log('not current session message');
       return;
     }
 
-    let that = this;
-    const messageItem = this.getPropsMessageItem(messageId, messageText, true, this.STATUS_ACCEPTED);
-    this.props.chatStore.updateMsg(messageItem).then(() => {
-      setTimeout(() => {
-        // scroll to latest message
-        if (that.refFlatList && that.refFlatList.current) {
-          that.refFlatList.current.scrollToEnd();
-        }
-      }, 500);
-    });
+    const messageItem = this.getPropsMessageItem(messageId, messageText, false, this.STATUS_ACCEPTED);
+    this.props.chatStore.updateItem(messageItem);
+    this.delayScrollToEnd();
   };
 
   copyToBoard = text => {
@@ -385,8 +381,7 @@ class Chat extends React.Component {
   render() {
     const {msgLists} = this.props.chatStore;
     const {userInput, connectError} = this.state;
-    const userAvatar = require('../resources/images/avatar.jpg');
-    console.log('connectError', connectError, typeof connectError);
+    const userAvatar = require('../resources/images/chatWithAvatar.jpg');
 
     return (
       <View style={styles.content}>
@@ -394,7 +389,7 @@ class Chat extends React.Component {
           <View style={[styles.rowLayout, styles.padding5]}>
             <View style={styles.row}>
               <Image style={styles.userAvatar} source={userAvatar} />
-              <Text style={{textAlign: "center", flex: 1, height: 40, alignSelf: 'center'}}>John Shine</Text>
+              <Text style={{textAlign: "center", flex: 1, height: 40, paddingTop: 10}}>Bruce Lee</Text>
             </View>
           </View>
           <View style={{backgroundColor: '#ddd', height: 1}} />
