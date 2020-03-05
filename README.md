@@ -4,6 +4,8 @@ This is the demo of react-native-xmpp: https://github.com/john-shine/react-nativ
 
 ## Preview
 
+![preview image](https://github.com/john-shine/react-native-xmpp-demo/raw/master/conversation.png)
+
 
 ## Getting started
 
