@@ -957,7 +957,7 @@
     metro-config "^0.56.0"
     metro-core "^0.56.0"
     metro-react-native-babel-transformer "^0.56.0"
-    minimist "^1.2.0"
+    minimist "^1.2.2"
     mkdirp "^0.5.1"
     morgan "^1.9.0"
     node-notifier "^5.2.1"
@@ -3874,7 +3874,7 @@ json5@^2.1.0:
   resolved "https://mirror.glan.space/api/npm/npm/json5/-/json5-2.1.1.tgz#81b6cb04e9ba496f1c7005d07b4368a2638f90b6"
   integrity sha1-gbbLBOm6SW8ccAXQe0NoomOPkLY=
   dependencies:
-    minimist "^1.2.0"
+    minimist "^1.2.2"
 
 jsonfile@^2.1.0:
   version "2.4.0"
@@ -5575,7 +5575,7 @@ sane@^4.0.3:
     execa "^1.0.0"
     fb-watchman "^2.0.0"
     micromatch "^3.1.4"
-    minimist "^1.1.1"
+    minimist "^1.2.2"
     walker "~1.0.5"
 
 sax@^1.2.1, sax@^1.2.4:
